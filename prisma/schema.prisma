@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       String @id @default(uuid()) @db.Uuid 
+  name     String @db.VarChar(100)
+  email    String @unique @db.VarChar(254)
+  cpf      String @unique @db.Char(11)
+  password String @db.VarChar(255)
+
+  clients  Client[]
+}
+
+model Client {
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String       @db.VarChar(100)
+  document     String       @unique @db.Char(14)
+  documentType DocumentType
+  email        String       @unique @db.VarChar(254)
+  
+  userId       String       @db.Uuid 
+  user         User         @relation(fields: [userId], references: [id])
+
+  address      Address?
+
+  contacts     Contact[]
+}
+
+model Contact {
+  id       String @id @default(uuid()) @db.Uuid
+  name     String @db.VarChar(100)
+  phone    String @db.VarChar(16)
+  email    String @db.VarChar(254)
+
+  clientId String @db.Uuid
+  client   Client @relation(fields: [clientId], references: [id])
+}
+
+model Address {
+  id           String  @id @default(uuid()) @db.Uuid
+  cep          String  @db.Char(8)
+  street       String  @db.VarChar(100)
+  number       String  @db.VarChar(10)
+  complement   String? @db.VarChar(100)
+  neighborhood String  @db.VarChar(100)
+  city         String  @db.VarChar(100)
+  state        String  @db.Char(2)
+  country      String  @db.Char(2)
+
+  clientId     String  @unique @db.Uuid
+  client       Client  @relation(fields: [clientId], references: [id])
+}
+
+enum DocumentType {
+  CPF
+  CNPJ
+}
