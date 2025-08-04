@@ -4,6 +4,6 @@ import { AuthModule } from './auth/auth.module';
 import { ClientsModule } from './clients/clients.module';
 
 @Module({
-  imports: [UsersModule, AuthModule, ClientsModule]
+  imports: [AuthModule, UsersModule, ClientsModule]
 })
 export class ModulesModule {}

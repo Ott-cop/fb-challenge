@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
-import { ClientControllerController } from './interface/controllers/client.controller.controller';
-import { ClientServiceService } from './domain/services/client.service';
+import { ClientController } from './interface/controllers/client.controller';
 import { PrismaClientRepository } from './infrastructure/persistence/repositories/prisma-client.repository';
+import { ClientService } from './domain/services/client.service';
+import { ViaCepService } from 'src/shared/services/via-cep/via-cep.service';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
-  controllers: [ClientControllerController],
-  providers: [ClientServiceService, PrismaClientRepository]
+  imports: [HttpModule],
+  controllers: [ClientController],
+  providers: [ClientService, PrismaClientRepository, ViaCepService]
 })
 export class ClientsModule {}

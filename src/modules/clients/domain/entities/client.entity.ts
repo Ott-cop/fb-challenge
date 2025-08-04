@@ -1,5 +1,6 @@
-import { Adress } from "./adress.entity";
+import { Address } from "./adress.entity";
 import { Contact } from "./contact.entity";
+import { DocumentType } from "./documentType.entity";
 
 export class Client {
     constructor(
@@ -9,7 +10,7 @@ export class Client {
         public documentType: DocumentType,
         public email: string,
         public userId: string,
-        public address?: Adress,
+        public address?: Address,
         public contacts?: Contact[]
     ) {}
 }

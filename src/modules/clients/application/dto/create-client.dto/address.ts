@@ -5,10 +5,9 @@ export class Address {
     @Cep()
     cep: string;
 
-    @IsPositive()
-    number: number;
+    number: string;
 
     @IsOptional()
     @Length(3, 100)
-    complement: string;
+    complement?: string | null;
 }

@@ -57,7 +57,7 @@ export class UserService {
             throw new NotFoundException(ErrorMessages.USER_NOT_FOUND());
         }
 
-        return await this.userRepository.update(id, UserMapper.toDomainPartial(updateUserDto));
+        return await this.userRepository.update(id, updateUserDto);
     }
 
     async remove(id: string) {

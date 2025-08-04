@@ -18,7 +18,7 @@ export class CreateClientDto {
     @Email()
     email: string;
     
-    address: Address;
+    address?: Address;
 
     contacts: Contact[];
 }

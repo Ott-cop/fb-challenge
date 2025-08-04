@@ -1,4 +1,4 @@
-export class Adress {
+export class Address {
     constructor(
         public readonly id: string,
         public cep: string,
