@@ -10,5 +10,5 @@ export class Address {
         public state: string,
         public country: string,
         public clientId: string
-    ) {}
+    ) {};
 }

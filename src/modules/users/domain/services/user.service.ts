@@ -3,7 +3,7 @@ import { PrismaUserRepository } from '../../infrastructure/persistence/repositor
 import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { UserMapper } from '../../infrastructure/mappers/user.mapper';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
-import { ErrorMessages } from 'src/shared/constants/error-messages';
+import { ErrorMessages, NotFoundTypes } from 'src/shared/constants/error-messages';
 import { isUUID } from 'class-validator';
 import { SignInAuthDto } from 'src/modules/auth/application/dto/sign-in-auth.dto';
 
@@ -12,18 +12,17 @@ export class UserService {
     constructor(private userRepository: PrismaUserRepository) {}
 
     async create(createUserDto: CreateUserDto) {
-        let user = UserMapper.userDtoToDomain(createUserDto);
-
-        if (await this.userRepository.isCpfOrEmailAlreadyInUse(user.cpf, user.email)) {
+        if (await this.userRepository.isCpfOrEmailAlreadyInUse(createUserDto.cpf, createUserDto.email)) {
             throw new ConflictException(ErrorMessages.CPF_OR_EMAIL_ALREADY_IN_USE());
         }
+
+        let user = UserMapper.userDtoToDomain(createUserDto);
 
         return await this.userRepository.create(user);
     }
 
     async findAll() {
-        let users = await this.userRepository.findAll();
-        return UserMapper.toSafeMany(users);
+        return await this.userRepository.findAll();
     }
 
     async findOneById(id: string) {
@@ -34,7 +33,7 @@ export class UserService {
         let user = await this.userRepository.findOneById(id);
 
         if (user == null) {
-            throw new NotFoundException(ErrorMessages.USER_NOT_FOUND());
+            throw new NotFoundException(ErrorMessages.NOT_FOUND(NotFoundTypes.USER));
         }
 
         return user;
@@ -44,7 +43,7 @@ export class UserService {
         let user = await this.userRepository.findOneByEmail(email);
 
         if (user == null) {
-            throw new NotFoundException(ErrorMessages.USER_NOT_FOUND());
+            throw new NotFoundException(ErrorMessages.NOT_FOUND(NotFoundTypes.USER));
         }
 
         return user;
@@ -54,7 +53,7 @@ export class UserService {
         let user = await this.userRepository.findOneById(id);
 
         if (user == null) {
-            throw new NotFoundException(ErrorMessages.USER_NOT_FOUND());
+            throw new NotFoundException(ErrorMessages.NOT_FOUND(NotFoundTypes.USER));
         }
 
         return await this.userRepository.update(id, updateUserDto);
@@ -64,7 +63,7 @@ export class UserService {
         let user = await this.userRepository.findOneById(id);
 
         if (user == null) {
-            throw new NotFoundException(ErrorMessages.USER_NOT_FOUND());
+            throw new NotFoundException(ErrorMessages.NOT_FOUND(NotFoundTypes.USER));
         }
 
         return await this.userRepository.delete(user.id);

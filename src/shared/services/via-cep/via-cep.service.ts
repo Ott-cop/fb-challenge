@@ -18,15 +18,15 @@ export class ViaCepService {
             this.httpService.get(`https://viacep.com.br/ws/${cleanedCep}/json/`)
         );
 
-        if (data.erro) {
-        throw new Error('CEP inválido ou não encontrado');
+        if (data.error) {
+            throw new Error('Invalid CEP or not found.');
         }
 
         return {
-        street: data.logradouro,
-        neighborhood: data.bairro,
-        city: data.localidade,
-        state: data.uf
+            street: data.logradouro,
+            neighborhood: data.bairro,
+            city: data.localidade,
+            state: data.uf
         };
     }
 }

@@ -1,24 +1,40 @@
 
 import { Client as ClientPrisma, Address as AddressPrisma, Contact as ContactPrisma, Prisma } from "generated/prisma";
 import { CreateClientDto } from "../../application/dto/create-client.dto/create-client.dto";
-
-import { UserMapper } from "src/modules/users/infrastructure/mappers/user.mapper";
 import { Client } from "../../domain/entities/client.entity";
 import { DocumentType } from "../../domain/entities/documentType.entity";
-import { Address } from "../../domain/entities/adress.entity";
+import { Address } from "../../domain/entities/address.entity";
 import { Contact } from "../../domain/entities/contact.entity";
+import { EnrichedAddress } from "../../domain/entities/enriched-address.entity";
+import { SafeClient } from "../../application/dto/safe-client.dto";
+import { UserMapper } from "src/modules/users/infrastructure/mappers/user.mapper";
 
 
 export class ClientMapper {
-    static clientDtoToDomain(clientDTO: CreateClientDto, id: string): Client {
-      return new Client(
-        '',
-        clientDTO.name,
-        clientDTO.document,
-        clientDTO.documentType,
-        clientDTO.email,
-        id
-      );
+    static clientDtoToDomain(clientDTO: CreateClientDto, enrichedAddress: EnrichedAddress, id: string): Client {
+        const address = clientDTO.address
+        ? new Address(
+            '',
+            enrichedAddress.cep,
+            enrichedAddress.street,
+            enrichedAddress.number,
+            enrichedAddress.complement,
+            enrichedAddress.neighborhood,
+            enrichedAddress.city,
+            enrichedAddress.state,
+            enrichedAddress.country,
+            ''
+        ) : undefined;
+
+        return new Client(
+            '',
+            clientDTO.name,
+            clientDTO.document,
+            clientDTO.documentType,
+            clientDTO.email,
+            id,
+            address
+        );
     }
 
     static toPersistence(client: Client): Prisma.ClientCreateInput {
@@ -33,7 +49,7 @@ export class ClientMapper {
             address: client.address
             ? {
                 create: {
-                    id: client.address.id,
+                    // id: client.address.id,
                     cep: client.address.cep,
                     street: client.address.street,
                     number: client.address.number,
@@ -48,7 +64,7 @@ export class ClientMapper {
             contacts: client.contacts && client.contacts.length
             ? {
                 create: client.contacts.map(contact => ({
-                    id: contact.id,
+                    // id: contact.id,
                     name: contact.name,
                     phone: contact.phone,
                     email: contact.email
@@ -58,22 +74,36 @@ export class ClientMapper {
         };
     }
 
-    static toSafe(client: ClientPrisma): Omit<Client, 'contacts' | 'address'> {
-        return new Client(
-            client.id,
-            client.name,
-            client.document,
-            client.documentType as DocumentType,
-            client.email,
-            client.userId
-        );
+    static toSafe(client: Client & { address?: Address } | null): SafeClient {
+
+        let safeClient: SafeClient = {
+            id: client!.id,
+            name: client!.name,
+            document: client!.document,
+            documentType: client!.documentType as DocumentType,
+            email: client!.email,
+            userId: client!.userId,
+            address: client!.address
+        };
+
+        return safeClient;
+
+        // return new Client(
+        //     client!.id,
+        //     client!.name,
+        //     client!.document,
+        //     client!.documentType as DocumentType,
+        //     client!.email,
+        //     client!.userId,
+        //     client!.address ? client!.address : undefined
+        // );
     }
 
-    static toSafeMany(clients: ClientPrisma[]): Omit<Client, 'contacts' | 'address'>[] {
+    static toSafeMany(clients: Client[]): SafeClient[] {
         return clients.map(ClientMapper.toSafe);
     }
 
-    static toDomain(data: ClientPrisma & { address?: AddressPrisma | null, contacts?: ContactPrisma[] }): Client {
+    static toDomain(data: (ClientPrisma & { address?: AddressPrisma | null, contacts?: ContactPrisma[] })): Client {
         const address = data.address
         ? new Address(
             data.address.id,
@@ -100,14 +130,18 @@ export class ClientMapper {
         ) ?? [];
 
         return new Client(
-        data.id,
-        data.name,
-        data.document,
-        data.documentType as DocumentType, 
-        data.email,
-        data.userId,
-        address,
-        contacts
+            data.id,
+            data.name,
+            data.document,
+            data.documentType as DocumentType, 
+            data.email,
+            data.userId,
+            address,
+            // contacts
         );
-  }
+    }
+
+    static toDomainMany(data: (ClientPrisma & { address?: AddressPrisma | null, contacts?: ContactPrisma[] })[]): Client[] {
+        return data.map(ClientMapper.toDomain)
+    }
 }

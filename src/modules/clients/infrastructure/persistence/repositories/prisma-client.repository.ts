@@ -15,21 +15,29 @@ export class PrismaClientRepository implements ClientRepository {
         });
     }
 
-    async findAll(auth_id: string): Promise<Partial<Client[]>> {
+    async findAll(auth_id: string): Promise<Client[]> {
         let clients = await this.prismaService.client.findMany({
             where: {
                 userId: auth_id
+            },
+            include: {
+                address: true
             }
         });
+
+        let mappedClients = ClientMapper.toDomainMany(clients); 
       
-        return ClientMapper.toSafeMany(clients);
+        return ClientMapper.toSafeMany(mappedClients);
     }
 
-    async findOneById(id: string, auth_id: string): Promise<Partial<Client> | null> {
+    async findOneById(id: string, auth_id: string): Promise<Client | null> {
         let client = await this.prismaService.client.findFirst({
             where: {
                 userId: auth_id,
                 id
+            },
+            include: {
+                address: true
             }
         });
 
@@ -45,7 +53,23 @@ export class PrismaClientRepository implements ClientRepository {
             where: { 
                 userId: auth_id,
                 id 
+            },
+            include: {
+                address: true
             }
         });
     }
+
+    async isDocumentOrEmailAlreadyInUse(document: string, email: string): Promise<boolean> {
+        const user = await this.prismaService.client.findFirst({
+            where: {
+              OR: [
+                { email },
+                { document }
+              ],
+            },
+        });
+      
+        return !!user;
+    }   
 }

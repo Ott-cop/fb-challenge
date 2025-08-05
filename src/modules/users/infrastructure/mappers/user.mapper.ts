@@ -2,6 +2,7 @@ import { Prisma } from "generated/prisma";
 import { CreateUserDto } from "src/modules/users/application/dto/create-user.dto";
 import { UpdateUserDto } from "src/modules/users/application/dto/update-user.dto";
 import { User } from "../../domain/entities/user.entity";
+import { SafeUser } from "../../application/dto/safe-user.dto";
 
 export class UserMapper {
     static userDtoToDomain(userDTO: CreateUserDto): User {
@@ -36,12 +37,12 @@ export class UserMapper {
       return user;
     }
 
-    static toSafe(user: User): Omit<User, 'password'> {
+    static toSafe(user: User): SafeUser {
         const { password, ...safeUser } = user;
         return safeUser;
     }
 
-    static toSafeMany(users: User[]): Omit<User, 'password'>[] {
+    static toSafeMany(users: User[]): SafeUser[] {
         return users.map(UserMapper.toSafe);
     }
 

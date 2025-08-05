@@ -1,4 +1,4 @@
-import { Address } from "./adress.entity";
+import { Address } from "./address.entity";
 import { Contact } from "./contact.entity";
 import { DocumentType } from "./documentType.entity";
 
