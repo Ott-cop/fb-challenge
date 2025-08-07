@@ -1,5 +1,6 @@
 import { Address } from "../../domain/entities/address.entity";
 import { DocumentType } from "../../domain/entities/documentType.entity";
+import { SafeAddress } from "./safe-address.dto";
 
 export interface SafeClient {
     id: string,
@@ -8,5 +9,5 @@ export interface SafeClient {
     documentType: DocumentType,
     email: string,
     userId: string,
-    address: Address | undefined
+    address: SafeAddress | undefined
 }

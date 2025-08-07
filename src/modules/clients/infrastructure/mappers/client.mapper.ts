@@ -7,7 +7,7 @@ import { Address } from "../../domain/entities/address.entity";
 import { Contact } from "../../domain/entities/contact.entity";
 import { EnrichedAddress } from "../../domain/entities/enriched-address.entity";
 import { SafeClient } from "../../application/dto/safe-client.dto";
-import { UserMapper } from "src/modules/users/infrastructure/mappers/user.mapper";
+import { SafeAddress } from "../../application/dto/safe-address.dto";
 
 
 export class ClientMapper {
@@ -26,6 +26,16 @@ export class ClientMapper {
             ''
         ) : undefined;
 
+        const contacts = clientDTO.contacts?.map(contact =>
+        new Contact(
+            '',
+            contact.name,
+            contact.phone,
+            contact.email,
+            ''
+        )
+        ) ?? [];
+
         return new Client(
             '',
             clientDTO.name,
@@ -33,7 +43,8 @@ export class ClientMapper {
             clientDTO.documentType,
             clientDTO.email,
             id,
-            address
+            address,
+            contacts
         );
     }
 
@@ -49,7 +60,6 @@ export class ClientMapper {
             address: client.address
             ? {
                 create: {
-                    // id: client.address.id,
                     cep: client.address.cep,
                     street: client.address.street,
                     number: client.address.number,
@@ -59,22 +69,25 @@ export class ClientMapper {
                     state: client.address.state,
                     country: client.address.country,
                 }
-                }
+            }
             : undefined,
             contacts: client.contacts && client.contacts.length
             ? {
                 create: client.contacts.map(contact => ({
-                    // id: contact.id,
                     name: contact.name,
                     phone: contact.phone,
                     email: contact.email
                 }))
-                }
+            }
             : undefined
         };
     }
 
     static toSafe(client: Client & { address?: Address } | null): SafeClient {
+
+        let { clientId, ...less_address } = client!.address!;
+        
+        let safeAddress: SafeAddress = less_address;
 
         let safeClient: SafeClient = {
             id: client!.id,
@@ -83,20 +96,10 @@ export class ClientMapper {
             documentType: client!.documentType as DocumentType,
             email: client!.email,
             userId: client!.userId,
-            address: client!.address
+            address: safeAddress
         };
 
         return safeClient;
-
-        // return new Client(
-        //     client!.id,
-        //     client!.name,
-        //     client!.document,
-        //     client!.documentType as DocumentType,
-        //     client!.email,
-        //     client!.userId,
-        //     client!.address ? client!.address : undefined
-        // );
     }
 
     static toSafeMany(clients: Client[]): SafeClient[] {
@@ -137,7 +140,7 @@ export class ClientMapper {
             data.email,
             data.userId,
             address,
-            // contacts
+            contacts
         );
     }
 

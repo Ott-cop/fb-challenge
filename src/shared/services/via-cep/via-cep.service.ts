@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios'
 import { firstValueFrom } from 'rxjs';
+import { AxiosError } from 'axios';
 
 @Injectable()
 export class ViaCepService {
@@ -14,19 +15,30 @@ export class ViaCepService {
     }> {
         const cleanedCep = cep.replace(/\D/g, '');
 
-        const { data } = await firstValueFrom(
-            this.httpService.get(`https://viacep.com.br/ws/${cleanedCep}/json/`)
-        );
+        try {
+            const { data } = await firstValueFrom(
+                this.httpService.get(`https://viacep.com.br/ws/${cleanedCep}/json/`)
+            );
 
-        if (data.error) {
-            throw new Error('Invalid CEP or not found.');
+            if (data.erro) {
+                throw new Error('Invalid CEP or not found.');
+            }
+
+            return {
+                street: data.logradouro,
+                neighborhood: data.bairro,
+                city: data.localidade,
+                state: data.uf
+            };
+        } catch (error) {
+        if (error.isAxiosError) {
+            const axiosError = error as AxiosError;
+            throw new InternalServerErrorException(
+            `Erro ao conectar com ViaCEP: ${axiosError.message}`
+            );
         }
-
-        return {
-            street: data.logradouro,
-            neighborhood: data.bairro,
-            city: data.localidade,
-            state: data.uf
-        };
+        
+        throw new InternalServerErrorException(error.message);
+        }
     }
 }

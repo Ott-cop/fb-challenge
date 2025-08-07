@@ -14,7 +14,7 @@ export class ClientService {
 
     async findAll(auth_id: string) {
         let clients = await this.clientRepository.findAll(auth_id);
-        return ClientMapper.toSafeMany(clients);
+        return clients;
     }
 
     async findOneById(id: string, auth_id: string) {
@@ -32,7 +32,8 @@ export class ClientService {
     }
 
     async create(createClientDto: CreateClientDto, auth_id: string) {
-        if (await this.clientRepository.isDocumentOrEmailAlreadyInUse(createClientDto.document, createClientDto.email)) {
+        
+        if (await this.clientRepository.isDocumentOrEmailAlreadyInUse(createClientDto.document, createClientDto.email, auth_id)) {
             throw new ConflictException(ErrorMessages.DOCUMENT_OR_EMAIL_ALREADY_IN_USE());
         }
 
@@ -60,6 +61,10 @@ export class ClientService {
     }
 
     async remove(id: string, auth_id: string) {
+        if (!isUUID(id)) {
+            throw new BadRequestException(ErrorMessages.INVALID_UUID_FORMAT());
+        }
+
         let user = await this.clientRepository.findOneById(id, auth_id);
 
         if (user == null) {

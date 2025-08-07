@@ -27,9 +27,9 @@ model User {
 model Client {
   id           String       @id @default(uuid()) @db.Uuid
   name         String       @db.VarChar(100)
-  document     String       @unique @db.Char(14)
+  document     String       @db.Char(14)
   documentType DocumentType
-  email        String       @unique @db.VarChar(254)
+  email        String       @db.VarChar(254)
   
   userId       String       @db.Uuid 
   user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)

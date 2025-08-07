@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common";
 import { UserRepository } from "src/modules/users/domain/repositories/user.repository";
 import { PrismaService } from "src/shared/persistence/prisma/prisma.service";
 import { UserMapper } from "../../mappers/user.mapper";
-import { User as UserPrisma } from "generated/prisma";
 import { User } from "src/modules/users/domain/entities/user.entity";
 import { UpdateUserDto } from "src/modules/users/application/dto/update-user.dto";
 import { SafeUser } from "src/modules/users/application/dto/safe-user.dto";
@@ -10,6 +9,7 @@ import { SafeUser } from "src/modules/users/application/dto/safe-user.dto";
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
     constructor(private readonly prismaService: PrismaService) {}
+
     async create(user: User): Promise<SafeUser> {
         let created_user = await this.prismaService.user.create({ 
             data: UserMapper.toPersistence(user)

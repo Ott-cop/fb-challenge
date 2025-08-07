@@ -3,8 +3,9 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { ClientsModule } from './clients/clients.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { ContactsModule } from './contacts/contacts.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, ClientsModule, AddressesModule]
+  imports: [AuthModule, UsersModule, ClientsModule, AddressesModule, ContactsModule]
 })
 export class ModulesModule {}

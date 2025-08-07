@@ -5,7 +5,6 @@ import { UserMapper } from '../../infrastructure/mappers/user.mapper';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { ErrorMessages, NotFoundTypes } from 'src/shared/constants/error-messages';
 import { isUUID } from 'class-validator';
-import { SignInAuthDto } from 'src/modules/auth/application/dto/sign-in-auth.dto';
 
 @Injectable()
 export class UserService {
@@ -50,6 +49,10 @@ export class UserService {
     }
 
     async update(id: string, updateUserDto: UpdateUserDto) {
+        if (!isUUID(id)) {
+            throw new BadRequestException(ErrorMessages.INVALID_UUID_FORMAT());
+        }
+
         let user = await this.userRepository.findOneById(id);
 
         if (user == null) {
@@ -60,6 +63,10 @@ export class UserService {
     }
 
     async remove(id: string) {
+        if (!isUUID(id)) {
+            throw new BadRequestException(ErrorMessages.INVALID_UUID_FORMAT());
+        }
+
         let user = await this.userRepository.findOneById(id);
 
         if (user == null) {

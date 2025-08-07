@@ -3,7 +3,10 @@ import { Address } from "src/modules/addresses/domain/entitites/address.entity";
 import { AddressRepository } from "../../../domain/repositories/address.repository";
 import { PrismaService } from "src/shared/persistence/prisma/prisma.service";
 import { AddressMapper } from "../../mappers/address.mapper";
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import { UpdateAddressDto } from "src/modules/addresses/application/dto/update-address.dto";
+import { ErrorMessages, NotFoundTypes } from "src/shared/constants/error-messages";
+import { UpdateAddress } from "src/modules/addresses/domain/entitites/update-address.entity";
 
 @Injectable()
 export class PrismaAddressRepository implements AddressRepository {
@@ -28,6 +31,19 @@ export class PrismaAddressRepository implements AddressRepository {
         if (!address) return null; 
 
         return AddressMapper.toSafe(address);
+    }
+
+    async update(id: string, address_update: UpdateAddress, auth_id: string): Promise<Address> {
+
+        const address = await this.prismaService.address.update({
+            where: { 
+                id, 
+                client: { userId: auth_id } 
+            },
+            data: address_update
+        });
+
+        return address;
     }
 
     async delete(id: string, auth_id: string): Promise<void> {
