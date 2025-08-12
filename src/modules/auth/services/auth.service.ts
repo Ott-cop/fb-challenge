@@ -5,19 +5,21 @@ import { ErrorMessages, NotFoundTypes } from 'src/shared/constants/error-message
 import { JwtService } from '@nestjs/jwt';
 import { PrismaAuthRepository } from '../repositories/prisma-auth.repository';
 import { JwtPayload } from '../jwt-payload';
+import { PasswordService } from 'src/shared/security/password.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private authRepository: PrismaAuthRepository,
-        private jwtService: JwtService
+        private jwtService: JwtService,
+        private passwordService: PasswordService
     ) {}
 
     async signIn(credentials: SignInAuthDto): Promise<{ access_token: string }> {
         
         const user = await this.authRepository.findOneByEmail(credentials.email);
 
-        if (user == null || credentials.password != user.password) {
+        if (user == null || !(await this.passwordService.compare(credentials.password, user.password))) {
             throw new UnauthorizedException(ErrorMessages.INCORRECT_CREDENTIALS());
         } 
 

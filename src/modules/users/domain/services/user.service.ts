@@ -5,10 +5,14 @@ import { UserMapper } from '../../infrastructure/mappers/user.mapper';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
 import { ErrorMessages, NotFoundTypes } from 'src/shared/constants/error-messages';
 import { isUUID } from 'class-validator';
+import { PasswordService } from 'src/shared/security/password.service';
 
 @Injectable()
 export class UserService {
-    constructor(private userRepository: PrismaUserRepository) {}
+    constructor(
+        private userRepository: PrismaUserRepository,
+        private passwordService: PasswordService
+    ) {}
 
     async create(createUserDto: CreateUserDto) {
         if (await this.userRepository.isCpfOrEmailAlreadyInUse(createUserDto.cpf, createUserDto.email)) {
@@ -16,6 +20,8 @@ export class UserService {
         }
 
         let user = UserMapper.userDtoToDomain(createUserDto);
+
+        user.password = await this.passwordService.hash(user.password);
 
         return await this.userRepository.create(user);
     }

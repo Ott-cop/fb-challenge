@@ -8,6 +8,7 @@ import { UserService } from '../users/domain/services/user.service';
 import { PrismaUserRepository } from '../users/infrastructure/persistence/repositories/prisma-user.repository';
 import { PrismaAuthRepository } from './repositories/prisma-auth.repository';
 import { RoleModule } from './role/role.module';
+import { PasswordService } from 'src/shared/security/password.service';
 
 @Module({
   imports: [
@@ -17,9 +18,9 @@ import { RoleModule } from './role/role.module';
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '1d' }
     }),
-    RoleModule,
+    RoleModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, PrismaAuthRepository]
+  providers: [AuthService, PrismaAuthRepository, PasswordService]
 })
 export class AuthModule {}
